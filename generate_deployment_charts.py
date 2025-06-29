@@ -14,8 +14,8 @@ from memory_profiler import profile
 import time
 import psutil
 
-# 设置中文字体和样式
-plt.rcParams['font.sans-serif'] = ['SimHei', 'DejaVu Sans']
+# Set English font and style
+plt.rcParams['font.family'] = 'DejaVu Sans'
 plt.rcParams['axes.unicode_minus'] = False
 sns.set_style("whitegrid")
 
@@ -55,7 +55,7 @@ class DeploymentComparisonGenerator:
         # 输出层: 32 -> 78 = 32*78 + 78 = 2574 参数
         # 总计: 4846 参数 * 4 bytes (float32) = 19,384 bytes
         # 加上框架开销，估算为 500KB
-        model_sizes['神经网络'] = 500 * 1024  # 500KB
+        model_sizes['Neural Network'] = 500 * 1024  # 500KB
         
         return model_sizes
     
@@ -103,22 +103,22 @@ class DeploymentComparisonGenerator:
             nn_memory_after_inference = process.memory_info().rss
             
             memory_usage = {
-                'PCE模型加载': (pce_memory_after_load - baseline_memory) / 1024 / 1024,  # MB
-                'PCE推理': (pce_memory_after_inference - pce_memory_after_load) / 1024 / 1024,
-                'NN模型加载': (nn_memory_after_load - pce_memory_after_inference) / 1024 / 1024,
-                'NN推理': (nn_memory_after_inference - nn_memory_after_load) / 1024 / 1024
+                'PCE Model Loading': (pce_memory_after_load - baseline_memory) / 1024 / 1024,  # MB
+                'PCE Inference': (pce_memory_after_inference - pce_memory_after_load) / 1024 / 1024,
+                'NN Model Loading': (nn_memory_after_load - pce_memory_after_inference) / 1024 / 1024,
+                'NN Inference': (nn_memory_after_inference - nn_memory_after_load) / 1024 / 1024
             }
             
             return memory_usage
             
         except Exception as e:
             print(f"内存测量失败: {e}")
-            # 返回估算值
+            # Return estimated values
             return {
-                'PCE模型加载': 0.5,  # MB
-                'PCE推理': 2.0,
-                'NN模型加载': 15.0,
-                'NN推理': 25.0
+                'PCE Model Loading': 0.5,  # MB
+                'PCE Inference': 2.0,
+                'NN Model Loading': 15.0,
+                'NN Inference': 25.0
             }
     
     def create_model_size_comparison(self, model_sizes):
@@ -130,8 +130,8 @@ class DeploymentComparisonGenerator:
         sizes_kb = [size / 1024 for size in model_sizes.values()]
         
         bars = ax1.bar(models, sizes_kb, color=[self.colors['pce'], self.colors['nn']], alpha=0.8)
-        ax1.set_ylabel('模型大小 (KB)', fontsize=12)
-        ax1.set_title('模型存储空间对比', fontsize=14, fontweight='bold')
+        ax1.set_ylabel('Model Size (KB)', fontsize=12)
+        ax1.set_title('Model Storage Space Comparison', fontsize=14, fontweight='bold')
         ax1.grid(True, alpha=0.3)
         
         # 添加数值标签
@@ -140,10 +140,10 @@ class DeploymentComparisonGenerator:
             ax1.text(bar.get_x() + bar.get_width()/2., height + max(sizes_kb)*0.01,
                     f'{size:.1f} KB', ha='center', va='bottom', fontsize=11, fontweight='bold')
         
-        # 大小比例饼图
+        # Size proportion pie chart
         ax2.pie(sizes_kb, labels=models, autopct='%1.1f%%', startangle=90,
                colors=[self.colors['pce'], self.colors['nn']], explode=(0.1, 0))
-        ax2.set_title('模型大小占比', fontsize=14, fontweight='bold')
+        ax2.set_title('Model Size Proportion', fontsize=14, fontweight='bold')
         
         plt.tight_layout()
         plt.savefig('model_size_comparison.png', dpi=300, bbox_inches='tight')
@@ -155,26 +155,26 @@ class DeploymentComparisonGenerator:
         """创建内存使用对比图"""
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
         
-        # 内存使用堆叠柱状图
-        pce_load = memory_usage['PCE模型加载']
-        pce_inference = memory_usage['PCE推理']
-        nn_load = memory_usage['NN模型加载']
-        nn_inference = memory_usage['NN推理']
-        
-        models = ['PCE', '神经网络']
+        # Memory usage stacked bar chart
+        pce_load = memory_usage['PCE Model Loading']
+        pce_inference = memory_usage['PCE Inference']
+        nn_load = memory_usage['NN Model Loading']
+        nn_inference = memory_usage['NN Inference']
+
+        models = ['PCE', 'Neural Network']
         load_memory = [pce_load, nn_load]
         inference_memory = [pce_inference, nn_inference]
         
         width = 0.6
         x = np.arange(len(models))
         
-        bars1 = ax1.bar(x, load_memory, width, label='模型加载', 
+        bars1 = ax1.bar(x, load_memory, width, label='Model Loading',
                        color=self.colors['memory'], alpha=0.8)
-        bars2 = ax1.bar(x, inference_memory, width, bottom=load_memory, 
-                       label='推理计算', color=self.colors['storage'], alpha=0.8)
-        
-        ax1.set_ylabel('内存使用 (MB)', fontsize=12)
-        ax1.set_title('内存使用对比', fontsize=14, fontweight='bold')
+        bars2 = ax1.bar(x, inference_memory, width, bottom=load_memory,
+                       label='Inference Computing', color=self.colors['storage'], alpha=0.8)
+
+        ax1.set_ylabel('Memory Usage (MB)', fontsize=12)
+        ax1.set_title('Memory Usage Comparison', fontsize=14, fontweight='bold')
         ax1.set_xticks(x)
         ax1.set_xticklabels(models)
         ax1.legend()
@@ -187,25 +187,25 @@ class DeploymentComparisonGenerator:
                     f'{total:.1f} MB', ha='center', va='bottom', 
                     fontsize=11, fontweight='bold')
         
-        # 内存效率对比 (PCE相对NN的内存节省)
+        # Memory efficiency comparison (PCE memory savings vs NN)
         total_pce = pce_load + pce_inference
         total_nn = nn_load + nn_inference
         memory_savings = (total_nn - total_pce) / total_nn * 100
-        
-        categories = ['模型加载', '推理计算', '总内存']
+
+        categories = ['Model Loading', 'Inference Computing', 'Total Memory']
         pce_values = [pce_load, pce_inference, total_pce]
         nn_values = [nn_load, nn_inference, total_nn]
         
         x2 = np.arange(len(categories))
         width2 = 0.35
         
-        bars3 = ax2.bar(x2 - width2/2, pce_values, width2, label='PCE', 
+        bars3 = ax2.bar(x2 - width2/2, pce_values, width2, label='PCE',
                        color=self.colors['pce'], alpha=0.8)
-        bars4 = ax2.bar(x2 + width2/2, nn_values, width2, label='神经网络', 
+        bars4 = ax2.bar(x2 + width2/2, nn_values, width2, label='Neural Network',
                        color=self.colors['nn'], alpha=0.8)
-        
-        ax2.set_ylabel('内存使用 (MB)', fontsize=12)
-        ax2.set_title(f'详细内存对比 (PCE节省{memory_savings:.1f}%)', fontsize=14, fontweight='bold')
+
+        ax2.set_ylabel('Memory Usage (MB)', fontsize=12)
+        ax2.set_title(f'Detailed Memory Comparison (PCE saves {memory_savings:.1f}%)', fontsize=14, fontweight='bold')
         ax2.set_xticks(x2)
         ax2.set_xticklabels(categories)
         ax2.legend()
@@ -221,19 +221,19 @@ class DeploymentComparisonGenerator:
         """创建部署复杂度对比图"""
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
         
-        # 部署步骤对比
+        # Deployment steps comparison
         deployment_steps = {
             'PCE': [
-                '编译Fortran程序',
-                '复制系数文件',
-                '运行可执行文件'
+                'Compile Fortran program',
+                'Copy coefficient files',
+                'Run executable'
             ],
-            '神经网络': [
-                '安装深度学习框架',
-                '安装Python依赖',
-                '加载模型文件',
-                '初始化推理引擎',
-                '运行Python脚本'
+            'Neural Network': [
+                'Install deep learning framework',
+                'Install Python dependencies',
+                'Load model files',
+                'Initialize inference engine',
+                'Run Python scripts'
             ]
         }
         
@@ -241,24 +241,24 @@ class DeploymentComparisonGenerator:
         models = list(deployment_steps.keys())
         
         bars = ax1.bar(models, step_counts, color=[self.colors['pce'], self.colors['nn']], alpha=0.8)
-        ax1.set_ylabel('部署步骤数量', fontsize=12)
-        ax1.set_title('部署复杂度对比', fontsize=14, fontweight='bold')
+        ax1.set_ylabel('Number of Deployment Steps', fontsize=12)
+        ax1.set_title('Deployment Complexity Comparison', fontsize=14, fontweight='bold')
         ax1.grid(True, alpha=0.3)
-        
-        # 添加数值标签
+
+        # Add value labels
         for bar, count in zip(bars, step_counts):
             height = bar.get_height()
             ax1.text(bar.get_x() + bar.get_width()/2., height + 0.1,
-                    f'{count} 步骤', ha='center', va='bottom', fontsize=11, fontweight='bold')
+                    f'{count} steps', ha='center', va='bottom', fontsize=11, fontweight='bold')
         
-        # 依赖项对比雷达图
-        categories = ['运行时依赖', '安装复杂度', '跨平台性', '启动速度', '维护成本']
-        
-        # PCE评分 (1-10, 10最好)
-        pce_scores = [9, 9, 8, 10, 9]  # 几乎无依赖、安装简单、跨平台好、启动快、维护简单
-        
-        # NN评分
-        nn_scores = [3, 4, 6, 5, 4]   # 依赖多、安装复杂、跨平台一般、启动慢、维护复杂
+        # Dependency comparison radar chart
+        categories = ['Runtime Dependencies', 'Installation Complexity', 'Cross-platform', 'Startup Speed', 'Maintenance Cost']
+
+        # PCE scores (1-10, 10 is best)
+        pce_scores = [9, 9, 8, 10, 9]  # Almost no dependencies, simple installation, good cross-platform, fast startup, easy maintenance
+
+        # NN scores
+        nn_scores = [3, 4, 6, 5, 4]   # Many dependencies, complex installation, average cross-platform, slow startup, complex maintenance
         
         angles = np.linspace(0, 2*np.pi, len(categories), endpoint=False).tolist()
         angles += angles[:1]  # 闭合图形
@@ -269,13 +269,13 @@ class DeploymentComparisonGenerator:
         ax2 = plt.subplot(1, 2, 2, projection='polar')
         ax2.plot(angles, pce_scores, 'o-', linewidth=2, label='PCE', color=self.colors['pce'])
         ax2.fill(angles, pce_scores, alpha=0.25, color=self.colors['pce'])
-        ax2.plot(angles, nn_scores, 'o-', linewidth=2, label='神经网络', color=self.colors['nn'])
+        ax2.plot(angles, nn_scores, 'o-', linewidth=2, label='Neural Network', color=self.colors['nn'])
         ax2.fill(angles, nn_scores, alpha=0.25, color=self.colors['nn'])
-        
+
         ax2.set_xticks(angles[:-1])
         ax2.set_xticklabels(categories)
         ax2.set_ylim(0, 10)
-        ax2.set_title('部署特性对比', fontsize=14, fontweight='bold', pad=20)
+        ax2.set_title('Deployment Features Comparison', fontsize=14, fontweight='bold', pad=20)
         ax2.legend(loc='upper right', bbox_to_anchor=(1.3, 1.0))
         ax2.grid(True)
         
@@ -289,34 +289,34 @@ class DeploymentComparisonGenerator:
         """创建平台兼容性对比图"""
         fig, ax = plt.subplots(1, 1, figsize=(12, 8))
         
-        platforms = ['Windows', 'Linux', 'macOS', '嵌入式Linux', 'RTOS', '微控制器']
-        
-        # 兼容性评分 (0-3: 0=不支持, 1=困难, 2=可行, 3=完美支持)
-        pce_compatibility = [3, 3, 3, 3, 2, 1]  # PCE可以编译到各种平台
-        nn_compatibility = [3, 3, 3, 1, 0, 0]   # NN需要完整的Python环境
+        platforms = ['Windows', 'Linux', 'macOS', 'Embedded Linux', 'RTOS', 'Microcontroller']
+
+        # Compatibility scores (0-3: 0=not supported, 1=difficult, 2=feasible, 3=perfect support)
+        pce_compatibility = [3, 3, 3, 3, 2, 1]  # PCE can be compiled to various platforms
+        nn_compatibility = [3, 3, 3, 1, 0, 0]   # NN requires complete Python environment
         
         x = np.arange(len(platforms))
         width = 0.35
         
-        bars1 = ax.bar(x - width/2, pce_compatibility, width, label='PCE', 
+        bars1 = ax.bar(x - width/2, pce_compatibility, width, label='PCE',
                       color=self.colors['pce'], alpha=0.8)
-        bars2 = ax.bar(x + width/2, nn_compatibility, width, label='神经网络', 
+        bars2 = ax.bar(x + width/2, nn_compatibility, width, label='Neural Network',
                       color=self.colors['nn'], alpha=0.8)
-        
-        ax.set_xlabel('目标平台', fontsize=12)
-        ax.set_ylabel('兼容性评分', fontsize=12)
-        ax.set_title('跨平台兼容性对比', fontsize=14, fontweight='bold')
+
+        ax.set_xlabel('Target Platform', fontsize=12)
+        ax.set_ylabel('Compatibility Score', fontsize=12)
+        ax.set_title('Cross-platform Compatibility Comparison', fontsize=14, fontweight='bold')
         ax.set_xticks(x)
         ax.set_xticklabels(platforms, rotation=45)
         ax.legend()
         ax.grid(True, alpha=0.3)
         
-        # 设置y轴标签
+        # Set y-axis labels
         ax.set_yticks([0, 1, 2, 3])
-        ax.set_yticklabels(['不支持', '困难', '可行', '完美'])
-        
-        # 添加数值标签
-        compatibility_labels = ['不支持', '困难', '可行', '完美']
+        ax.set_yticklabels(['Not Supported', 'Difficult', 'Feasible', 'Perfect'])
+
+        # Add value labels
+        compatibility_labels = ['Not Supported', 'Difficult', 'Feasible', 'Perfect']
         for bars in [bars1, bars2]:
             for bar in bars:
                 height = bar.get_height()
@@ -334,34 +334,34 @@ class DeploymentComparisonGenerator:
 def main():
     """主函数"""
     print("=" * 60)
-    print("PCE vs 神经网络部署特性对比图表生成器")
+    print("PCE vs Neural Network Deployment Features Comparison Chart Generator")
     print("=" * 60)
     
     generator = DeploymentComparisonGenerator()
     
-    # 1. 测量模型大小
-    print("\n1. 测量模型文件大小...")
+    # 1. Measure model sizes
+    print("\n1. Measuring model file sizes...")
     model_sizes = generator.measure_model_sizes()
-    print(f"PCE模型总大小: {model_sizes['PCE']:,} bytes ({model_sizes['PCE']/1024:.1f} KB)")
-    print(f"神经网络模型估算大小: {model_sizes['神经网络']:,} bytes ({model_sizes['神经网络']/1024:.1f} KB)")
-    
-    # 2. 测量内存使用
-    print("\n2. 测量内存使用情况...")
+    print(f"PCE model total size: {model_sizes['PCE']:,} bytes ({model_sizes['PCE']/1024:.1f} KB)")
+    print(f"Neural Network model estimated size: {model_sizes['Neural Network']:,} bytes ({model_sizes['Neural Network']/1024:.1f} KB)")
+
+    # 2. Measure memory usage
+    print("\n2. Measuring memory usage...")
     memory_usage = generator.measure_memory_usage()
     for key, value in memory_usage.items():
         print(f"{key}: {value:.1f} MB")
-    
-    # 3. 生成对比图表
-    print("\n3. 生成模型大小对比图...")
+
+    # 3. Generate comparison charts
+    print("\n3. Generating model size comparison chart...")
     generator.create_model_size_comparison(model_sizes)
-    
-    print("\n4. 生成内存使用对比图...")
+
+    print("\n4. Generating memory usage comparison chart...")
     generator.create_memory_usage_comparison(memory_usage)
-    
-    print("\n5. 生成部署复杂度对比图...")
+
+    print("\n5. Generating deployment complexity comparison chart...")
     generator.create_deployment_complexity_chart()
-    
-    print("\n6. 生成平台兼容性对比图...")
+
+    print("\n6. Generating platform compatibility comparison chart...")
     generator.create_platform_compatibility_chart()
     
     # 保存结果数据
@@ -374,8 +374,8 @@ def main():
         pickle.dump(deployment_data, f)
     
     print("\n" + "=" * 60)
-    print("部署特性对比图表生成完成！")
-    print("生成的文件:")
+    print("Deployment features comparison chart generation completed!")
+    print("Generated files:")
     print("  - model_size_comparison.png")
     print("  - memory_usage_comparison.png")
     print("  - deployment_complexity_comparison.png")

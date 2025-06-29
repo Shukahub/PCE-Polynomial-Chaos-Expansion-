@@ -180,8 +180,8 @@ class PCETrainer:
         print(f"Training completed!")
         print(f"  Training MSE: {train_mse:.6f}")
         print(f"  Test MSE: {test_mse:.6f}")
-        print(f"  Training R²: {train_r2:.6f}")
-        print(f"  Test R²: {test_r2:.6f}")
+        print(f"  Training R2: {train_r2:.6f}")
+        print(f"  Test R2: {test_r2:.6f}")
         
         return {
             'train_mse': train_mse,

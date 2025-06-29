@@ -57,8 +57,8 @@ except ImportError:
                 # 返回随机预测作为fallback
                 return np.random.uniform(-1, 1, (X.shape[0], self.output_dim))
 
-# 设置中文字体和样式
-plt.rcParams['font.sans-serif'] = ['SimHei', 'DejaVu Sans', 'Arial Unicode MS']
+# 设置英文字体和样式
+plt.rcParams['font.family'] = 'DejaVu Sans'
 plt.rcParams['axes.unicode_minus'] = False
 
 class ComparisonChartGenerator:
@@ -77,22 +77,22 @@ class ComparisonChartGenerator:
         
         functions = {}
         
-        # 1. 多项式函数 (PCE优势)
-        Y_poly = (0.5 + 1.2*X[:, 0] + 0.8*X[:, 1] + 
+        # 1. Polynomial function (PCE advantage)
+        Y_poly = (0.5 + 1.2*X[:, 0] + 0.8*X[:, 1] +
                  0.6*X[:, 0]**2 + 0.4*X[:, 0]*X[:, 1] + 0.3*X[:, 1]**2)
-        functions['多项式函数'] = Y_poly.reshape(-1, 1)
-        
-        # 2. 平滑非线性函数
-        Y_smooth = (0.5*np.sin(X[:, 0])*np.cos(X[:, 1]) + 
-                   0.3*np.exp(-0.5*(X[:, 0]**2 + X[:, 1]**2)) + 
+        functions['Polynomial'] = Y_poly.reshape(-1, 1)
+
+        # 2. Smooth nonlinear function
+        Y_smooth = (0.5*np.sin(X[:, 0])*np.cos(X[:, 1]) +
+                   0.3*np.exp(-0.5*(X[:, 0]**2 + X[:, 1]**2)) +
                    0.2*(X[:, 0]**2 + X[:, 1]**2))
-        functions['平滑非线性'] = Y_smooth.reshape(-1, 1)
-        
-        # 3. 复杂非线性函数
-        Y_complex = (np.sin(5*np.pi*X[:, 0])*np.cos(3*np.pi*X[:, 1]) + 
-                    np.tanh(10*X[:, 0]*X[:, 1]) + 
+        functions['Smooth Nonlinear'] = Y_smooth.reshape(-1, 1)
+
+        # 3. Complex nonlinear function
+        Y_complex = (np.sin(5*np.pi*X[:, 0])*np.cos(3*np.pi*X[:, 1]) +
+                    np.tanh(10*X[:, 0]*X[:, 1]) +
                     np.sign(X[:, 0] + X[:, 1])*np.sqrt(np.abs(X[:, 0]*X[:, 1])))
-        functions['复杂非线性'] = Y_complex.reshape(-1, 1)
+        functions['Complex Nonlinear'] = Y_complex.reshape(-1, 1)
         
         return X, functions
     
@@ -160,12 +160,12 @@ class ComparisonChartGenerator:
         # R²对比
         bars1 = ax1.bar(x - width/2, pce_r2, width, label='PCE', 
                        color=self.colors['pce'], alpha=0.8)
-        bars2 = ax1.bar(x + width/2, nn_r2, width, label='神经网络', 
+        bars2 = ax1.bar(x + width/2, nn_r2, width, label='Neural Network',
                        color=self.colors['nn'], alpha=0.8)
-        
-        ax1.set_xlabel('函数类型', fontsize=12)
+
+        ax1.set_xlabel('Function Type', fontsize=12)
         ax1.set_ylabel('R² Score', fontsize=12)
-        ax1.set_title('精度对比 - R² Score', fontsize=14, fontweight='bold')
+        ax1.set_title('Accuracy Comparison - R² Score', fontsize=14, fontweight='bold')
         ax1.set_xticks(x)
         ax1.set_xticklabels(functions)
         ax1.legend()
@@ -184,12 +184,12 @@ class ComparisonChartGenerator:
         # MSE对比 (对数尺度)
         bars3 = ax2.bar(x - width/2, pce_mse, width, label='PCE', 
                        color=self.colors['pce'], alpha=0.8)
-        bars4 = ax2.bar(x + width/2, nn_mse, width, label='神经网络', 
+        bars4 = ax2.bar(x + width/2, nn_mse, width, label='Neural Network',
                        color=self.colors['nn'], alpha=0.8)
-        
-        ax2.set_xlabel('函数类型', fontsize=12)
-        ax2.set_ylabel('MSE (对数尺度)', fontsize=12)
-        ax2.set_title('误差对比 - MSE', fontsize=14, fontweight='bold')
+
+        ax2.set_xlabel('Function Type', fontsize=12)
+        ax2.set_ylabel('MSE (Log Scale)', fontsize=12)
+        ax2.set_title('Error Comparison - MSE', fontsize=14, fontweight='bold')
         ax2.set_xticks(x)
         ax2.set_xticklabels(functions)
         ax2.set_yscale('log')
@@ -201,9 +201,9 @@ class ComparisonChartGenerator:
         colors = [self.colors['success'] if diff > 0 else self.colors['accent'] for diff in accuracy_diff]
         
         bars5 = ax3.bar(functions, accuracy_diff, color=colors, alpha=0.8)
-        ax3.set_xlabel('函数类型', fontsize=12)
-        ax3.set_ylabel('PCE相对NN的精度差异 (%)', fontsize=12)
-        ax3.set_title('PCE vs NN 精度差异', fontsize=14, fontweight='bold')
+        ax3.set_xlabel('Function Type', fontsize=12)
+        ax3.set_ylabel('PCE vs NN Accuracy Difference (%)', fontsize=12)
+        ax3.set_title('PCE vs NN Accuracy Difference', fontsize=14, fontweight='bold')
         ax3.axhline(y=0, color='black', linestyle='--', alpha=0.5)
         ax3.grid(True, alpha=0.3)
         
@@ -214,8 +214,8 @@ class ComparisonChartGenerator:
                     f'{diff:+.1f}%', ha='center', va='bottom' if height > 0 else 'top', 
                     fontsize=10, fontweight='bold')
         
-        # 综合评分雷达图
-        categories = ['精度', '训练速度', '推理速度', '内存效率', '可解释性']
+        # Comprehensive performance radar chart
+        categories = ['Accuracy', 'Training Speed', 'Inference Speed', 'Memory Efficiency', 'Interpretability']
         
         # 计算评分 (0-10分)
         pce_scores = []
@@ -247,13 +247,13 @@ class ComparisonChartGenerator:
         ax4 = plt.subplot(2, 2, 4, projection='polar')
         ax4.plot(angles, pce_avg, 'o-', linewidth=2, label='PCE', color=self.colors['pce'])
         ax4.fill(angles, pce_avg, alpha=0.25, color=self.colors['pce'])
-        ax4.plot(angles, nn_avg, 'o-', linewidth=2, label='神经网络', color=self.colors['nn'])
+        ax4.plot(angles, nn_avg, 'o-', linewidth=2, label='Neural Network', color=self.colors['nn'])
         ax4.fill(angles, nn_avg, alpha=0.25, color=self.colors['nn'])
-        
+
         ax4.set_xticks(angles[:-1])
         ax4.set_xticklabels(categories)
         ax4.set_ylim(0, 10)
-        ax4.set_title('综合性能对比', fontsize=14, fontweight='bold', pad=20)
+        ax4.set_title('Comprehensive Performance Comparison', fontsize=14, fontweight='bold', pad=20)
         ax4.legend(loc='upper right', bbox_to_anchor=(1.3, 1.0))
         ax4.grid(True)
         
@@ -279,12 +279,12 @@ class ComparisonChartGenerator:
         # 训练时间对比
         bars1 = ax1.bar(x - width/2, pce_train_times, width, label='PCE', 
                        color=self.colors['pce'], alpha=0.8)
-        bars2 = ax1.bar(x + width/2, nn_train_times, width, label='神经网络', 
+        bars2 = ax1.bar(x + width/2, nn_train_times, width, label='Neural Network',
                        color=self.colors['nn'], alpha=0.8)
-        
-        ax1.set_xlabel('函数类型', fontsize=12)
-        ax1.set_ylabel('训练时间 (秒)', fontsize=12)
-        ax1.set_title('训练速度对比', fontsize=14, fontweight='bold')
+
+        ax1.set_xlabel('Function Type', fontsize=12)
+        ax1.set_ylabel('Training Time (seconds)', fontsize=12)
+        ax1.set_title('Training Speed Comparison', fontsize=14, fontweight='bold')
         ax1.set_xticks(x)
         ax1.set_xticklabels(functions)
         ax1.legend()
@@ -293,12 +293,12 @@ class ComparisonChartGenerator:
         # 推理时间对比
         bars3 = ax2.bar(x - width/2, [t*1000 for t in pce_inference_times], width, 
                        label='PCE', color=self.colors['pce'], alpha=0.8)
-        bars4 = ax2.bar(x + width/2, [t*1000 for t in nn_inference_times], width, 
-                       label='神经网络', color=self.colors['nn'], alpha=0.8)
-        
-        ax2.set_xlabel('函数类型', fontsize=12)
-        ax2.set_ylabel('推理时间 (毫秒)', fontsize=12)
-        ax2.set_title('推理速度对比', fontsize=14, fontweight='bold')
+        bars4 = ax2.bar(x + width/2, [t*1000 for t in nn_inference_times], width,
+                       label='Neural Network', color=self.colors['nn'], alpha=0.8)
+
+        ax2.set_xlabel('Function Type', fontsize=12)
+        ax2.set_ylabel('Inference Time (ms)', fontsize=12)
+        ax2.set_title('Inference Speed Comparison', fontsize=14, fontweight='bold')
         ax2.set_xticks(x)
         ax2.set_xticklabels(functions)
         ax2.legend()
@@ -308,14 +308,14 @@ class ComparisonChartGenerator:
         train_speedup = [nn/max(pce, 1e-6) for pce, nn in zip(pce_train_times, nn_train_times)]
         inference_speedup = [nn/max(pce, 1e-6) for pce, nn in zip(pce_inference_times, nn_inference_times)]
         
-        bars5 = ax3.bar(x - width/2, train_speedup, width, label='训练速度提升', 
+        bars5 = ax3.bar(x - width/2, train_speedup, width, label='Training Speedup',
                        color=self.colors['accent'], alpha=0.8)
-        bars6 = ax3.bar(x + width/2, inference_speedup, width, label='推理速度提升', 
+        bars6 = ax3.bar(x + width/2, inference_speedup, width, label='Inference Speedup',
                        color=self.colors['success'], alpha=0.8)
-        
-        ax3.set_xlabel('函数类型', fontsize=12)
-        ax3.set_ylabel('PCE相对NN的速度提升倍数', fontsize=12)
-        ax3.set_title('PCE速度优势', fontsize=14, fontweight='bold')
+
+        ax3.set_xlabel('Function Type', fontsize=12)
+        ax3.set_ylabel('PCE vs NN Speed Improvement (x)', fontsize=12)
+        ax3.set_title('PCE Speed Advantage', fontsize=14, fontweight='bold')
         ax3.set_xticks(x)
         ax3.set_xticklabels(functions)
         ax3.legend()
@@ -335,12 +335,12 @@ class ComparisonChartGenerator:
         
         bars7 = ax4.bar(x - width/2, [t/1000 for t in pce_throughput], width, 
                        label='PCE', color=self.colors['pce'], alpha=0.8)
-        bars8 = ax4.bar(x + width/2, [t/1000 for t in nn_throughput], width, 
-                       label='神经网络', color=self.colors['nn'], alpha=0.8)
-        
-        ax4.set_xlabel('函数类型', fontsize=12)
-        ax4.set_ylabel('吞吐量 (千样本/秒)', fontsize=12)
-        ax4.set_title('推理吞吐量对比', fontsize=14, fontweight='bold')
+        bars8 = ax4.bar(x + width/2, [t/1000 for t in nn_throughput], width,
+                       label='Neural Network', color=self.colors['nn'], alpha=0.8)
+
+        ax4.set_xlabel('Function Type', fontsize=12)
+        ax4.set_ylabel('Throughput (K samples/sec)', fontsize=12)
+        ax4.set_title('Inference Throughput Comparison', fontsize=14, fontweight='bold')
         ax4.set_xticks(x)
         ax4.set_xticklabels(functions)
         ax4.legend()
@@ -355,37 +355,37 @@ class ComparisonChartGenerator:
 def main():
     """主函数"""
     print("=" * 60)
-    print("PCE vs 神经网络综合对比图表生成器")
+    print("PCE vs Neural Network Comprehensive Comparison Chart Generator")
     print("=" * 60)
     
     generator = ComparisonChartGenerator()
     
-    # 生成测试数据
-    print("\n1. 生成测试数据...")
+    # Generate test data
+    print("\n1. Generating test data...")
     X, functions = generator.generate_test_functions(n_samples=2000)
-    
-    # 对每种函数进行基准测试
+
+    # Benchmark each function type
     all_results = []
     for func_name, Y in functions.items():
-        print(f"\n2. 基准测试 - {func_name}...")
+        print(f"\n2. Benchmarking - {func_name}...")
         result = generator.benchmark_models(X, Y, func_name)
         all_results.append(result)
-        
+
         print(f"   PCE R²: {result['pce_r2']:.4f}")
         print(f"   NN R²: {result['nn_r2']:.4f}")
 
-        # 避免除零错误
+        # Avoid division by zero
         train_speedup = result['nn_train_time']/max(result['pce_train_time'], 1e-6)
         inference_speedup = result['nn_inference_time']/max(result['pce_inference_time'], 1e-6)
 
-        print(f"   训练速度提升: {train_speedup:.1f}x")
-        print(f"   推理速度提升: {inference_speedup:.1f}x")
-    
-    # 生成对比图表
-    print("\n3. 生成精度对比图表...")
+        print(f"   Training speedup: {train_speedup:.1f}x")
+        print(f"   Inference speedup: {inference_speedup:.1f}x")
+
+    # Generate comparison charts
+    print("\n3. Generating accuracy comparison charts...")
     generator.create_accuracy_comparison_chart(all_results)
-    
-    print("\n4. 生成速度对比图表...")
+
+    print("\n4. Generating speed comparison charts...")
     generator.create_speed_comparison_chart(all_results)
     
     # 保存结果数据
@@ -393,10 +393,10 @@ def main():
         pickle.dump(all_results, f)
     
     print("\n" + "=" * 60)
-    print("图表生成完成！")
-    print("生成的文件:")
+    print("Chart generation completed!")
+    print("Generated files:")
     print("  - comprehensive_accuracy_comparison.png")
-    print("  - comprehensive_speed_comparison.png") 
+    print("  - comprehensive_speed_comparison.png")
     print("  - comparison_results.pkl")
     print("=" * 60)
 
