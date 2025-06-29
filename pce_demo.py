@@ -38,18 +38,60 @@ class PerformanceComparator:
         
         return X_train, X_test, Y_train, Y_test
     
-    def train_pce(self, X_train, Y_train):
-        """训练PCE模型"""
-        print("\nTraining PCE model...")
+    def train_pce(self, X_train, Y_train, auto_order_selection=True, polynomial_order=None):
+        """训练PCE模型（支持智能阶数选择）"""
+        print("\n" + "="*60)
+        print("🚀 PCE模型训练")
+        print("="*60)
+
         start_time = time.time()
-        
-        self.pce_model = PCETrainer(input_dim=2, output_dim=78, polynomial_order=2)
-        results = self.pce_model.train(X_train, Y_train, test_size=0.1)  # 使用90%数据训练
-        
+
+        # 创建PCE训练器（支持自动阶数选择）
+        self.pce_model = PCETrainer(
+            input_dim=2,
+            output_dim=78,
+            polynomial_order=polynomial_order,
+            auto_order_selection=auto_order_selection
+        )
+
+        # 训练模型
+        results = self.pce_model.train(X_train, Y_train, test_size=0.1, max_order=4)
+
         pce_train_time = time.time() - start_time
-        print(f"PCE training time: {pce_train_time:.2f} seconds")
-        
+        print(f"\n⏱️  PCE总训练时间: {pce_train_time:.2f} 秒")
+
+        # 显示阶数选择结果
+        if self.pce_model.order_selection_results:
+            self._display_order_selection_results()
+
         return pce_train_time
+
+    def _display_order_selection_results(self):
+        """显示阶数选择结果"""
+        results = self.pce_model.order_selection_results
+
+        print("\n" + "="*50)
+        print("📊 智能阶数选择结果")
+        print("="*50)
+
+        print(f"🎯 最优阶数: {results['optimal_order']}")
+        print(f"📈 非线性强度分数: {results['theory_order']['nonlinearity_score']:.3f}")
+        print(f"💡 理论建议: {results['theory_order']['suggested_order']} ({results['theory_order']['reason']})")
+        print(f"🔄 交叉验证最佳: {results['cv_order']['best_order']}")
+        print(f"📊 AIC建议: {results['ic_order']['best_aic_order']}")
+        print(f"📊 BIC建议: {results['ic_order']['best_bic_order']}")
+
+        # 显示非线性分析详情
+        metrics = results['nonlinearity_metrics']
+        print(f"\n🔍 非线性强度分析:")
+        print(f"   线性相关性: {metrics['linear_correlation']['avg_linear_corr']:.3f}")
+        print(f"   非线性比例: {metrics['linear_correlation']['nonlinearity_ratio']:.3f}")
+        print(f"   高阶矩复杂度: {metrics['higher_moments']['moment_complexity']:.3f}")
+        print(f"   高频成分比例: {metrics['frequency_analysis']['avg_high_freq_ratio']:.3f}")
+        print(f"   局部线性度: {metrics['local_linearity']['avg_local_linearity']:.3f}")
+        print(f"   梯度变化: {metrics['gradient_variation']['avg_gradient_variation']:.3f}")
+
+        print("="*50)
     
     def train_neural_network(self, X_train, Y_train):
         """训练神经网络模型"""
@@ -216,19 +258,24 @@ Summary:
         print("Performance report saved to performance_report.txt")
 
 def main():
-    """主函数：运行完整的性能对比"""
-    print("=" * 60)
-    print("PCE vs Neural Network Performance Comparison")
-    print("=" * 60)
-    
+    """主函数：运行完整的智能PCE性能对比"""
+    print("=" * 80)
+    print("🎯 PCE vs Neural Network 智能性能对比系统")
+    print("=" * 80)
+
     comparator = PerformanceComparator()
-    
+
     # 1. 准备数据
+    print("\n📊 准备训练数据...")
     X_train, X_test, Y_train, Y_test = comparator.prepare_data(n_samples=2000)
-    print(f"Data prepared: {X_train.shape[0]} training, {X_test.shape[0]} test samples")
-    
-    # 2. 训练模型
-    pce_train_time = comparator.train_pce(X_train, Y_train)
+    print(f"✅ 数据准备完成: {X_train.shape[0]} 训练样本, {X_test.shape[0]} 测试样本")
+
+    # 2. 智能PCE训练（自动阶数选择）
+    print("\n🧠 开始智能PCE训练...")
+    pce_train_time = comparator.train_pce(X_train, Y_train, auto_order_selection=True)
+
+    # 3. 神经网络训练
+    print("\n🤖 开始神经网络训练...")
     nn_train_time = comparator.train_neural_network(X_train, Y_train)
     
     # 3. 基准测试推理速度
