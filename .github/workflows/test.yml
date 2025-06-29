@@ -1,0 +1,78 @@
+name: PCE System Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, '3.10']
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Install Fortran compiler
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gfortran
+    
+    - name: Test PCE trainer
+      run: |
+        python -c "
+        from pce_trainer import PCETrainer
+        import numpy as np
+        
+        # Quick test
+        trainer = PCETrainer(input_dim=2, output_dim=78, polynomial_order=2)
+        X, Y = trainer.generate_training_data(n_samples=100, noise_level=0.01)
+        trainer.train(X, Y)
+        
+        # Test prediction
+        test_input = np.array([[0.5, -0.3]])
+        prediction = trainer.predict(test_input)
+        assert prediction.shape == (1, 78), f'Expected (1, 78), got {prediction.shape}'
+        
+        print('✅ PCE trainer test passed')
+        "
+    
+    - name: Test Fortran compilation
+      run: |
+        gfortran -O3 -o pce_test PCE_fixed.f90
+        echo "✅ Fortran compilation successful"
+    
+    - name: Run quick verification
+      run: |
+        python quick_test.py
+    
+    - name: Generate test report
+      run: |
+        echo "## Test Results" > test_report.md
+        echo "- Python version: ${{ matrix.python-version }}" >> test_report.md
+        echo "- PCE trainer: ✅ Passed" >> test_report.md
+        echo "- Fortran compilation: ✅ Passed" >> test_report.md
+        echo "- System verification: ✅ Passed" >> test_report.md
+    
+    - name: Upload test artifacts
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-${{ matrix.python-version }}
+        path: |
+          test_report.md
+          *.pkl
+          *.txt
