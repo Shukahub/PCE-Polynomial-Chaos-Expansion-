@@ -13,22 +13,71 @@
 ## 📁 文件结构
 
 ```
-├── PCE.for                    # Fortran PCE推理程序
-├── pce_trainer.py            # Python PCE训练器
-├── data_generator.py         # 训练数据生成器
-├── pce_demo.py              # PCE vs 神经网络性能对比
-├── Makefile                 # Fortran编译配置
-├── README.md               # 本文档
-└── requirements.txt        # Python依赖
+├── 核心实现
+│   ├── PCE.for                           # Fortran PCE推理程序
+│   ├── pce_trainer.py                   # Python PCE训练器
+│   ├── data_generator.py                # 训练数据生成器
+│   └── pce_demo.py                      # PCE vs 神经网络性能对比
+│
+├── 对比图表生成
+│   ├── generate_comparison_charts.py    # 综合性能对比图表生成器
+│   ├── generate_deployment_charts.py    # 部署特性对比图表生成器
+│   ├── generate_all_charts.py           # 一键生成所有图表
+│   ├── view_charts.py                   # 图表查看器
+│   └── demo.py                          # 完整演示脚本
+│
+├── 可视化结果
+│   ├── comprehensive_accuracy_comparison.png    # 综合精度对比图
+│   ├── comprehensive_speed_comparison.png       # 综合速度对比图
+│   ├── model_size_comparison.png               # 模型大小对比图
+│   ├── memory_usage_comparison.png             # 内存使用对比图
+│   ├── deployment_complexity_comparison.png    # 部署复杂度对比图
+│   ├── platform_compatibility_comparison.png   # 平台兼容性对比图
+│   ├── pce_accuracy_analysis.png               # 精度分析图
+│   ├── pce_training_results.png                # 训练结果图
+│   └── pce_vs_nn_comparison.png                # PCE vs NN对比图
+│
+├── 配置文件
+│   ├── Makefile                         # Fortran编译配置
+│   ├── requirements.txt                 # Python依赖
+│   └── README.md                        # 本文档
+│
+└── 训练好的模型
+    ├── final_pce_model.pkl              # 最终PCE模型
+    └── final_pce_coefficients.txt       # Fortran系数文件
 ```
 
-## 🛠️ 安装和使用
+## 🚀 快速开始
+
+### 方法一：3步快速体验
+```bash
+# 1. 安装依赖
+pip install numpy matplotlib scikit-learn pandas seaborn
+
+# 2. 生成所有对比图表
+python generate_all_charts.py
+
+# 3. 查看对比结果
+python view_charts.py
+```
+
+### 方法二：一键演示
+```bash
+# 运行完整演示（包含环境检查、图表生成、PCE使用演示）
+python demo.py
+```
+
+## 🛠️ 详细安装和使用
 
 ### 1. 环境准备
 
 **Python环境**:
 ```bash
+# 基础依赖
 pip install numpy matplotlib scikit-learn pandas
+
+# 可选依赖（用于生成对比图表）
+pip install seaborn memory-profiler psutil
 ```
 
 **Fortran编译器**:
@@ -62,7 +111,49 @@ make run
 make benchmark
 ```
 
+### 4. 生成对比图表（可选）
+
+```bash
+# 一键生成所有对比图表
+python generate_all_charts.py
+
+# 或者分别生成
+python generate_comparison_charts.py    # 综合性能对比图表
+python generate_deployment_charts.py    # 部署特性对比图表
+```
+
+### 5. 查看生成的图表
+
+```bash
+# 查看所有图表
+python view_charts.py
+
+# 查看特定图表
+python view_charts.py accuracy    # 精度对比
+python view_charts.py speed       # 速度对比
+python view_charts.py deployment  # 部署对比
+
+# 列出所有图表文件
+python view_charts.py list
+```
+
+生成的对比图表包括：
+- 综合精度对比图 (`comprehensive_accuracy_comparison.png`)
+- 综合速度对比图 (`comprehensive_speed_comparison.png`)
+- 模型大小对比图 (`model_size_comparison.png`)
+- 内存使用对比图 (`memory_usage_comparison.png`)
+- 部署复杂度对比图 (`deployment_complexity_comparison.png`)
+- 平台兼容性对比图 (`platform_compatibility_comparison.png`)
+
 ## 📊 性能对比
+
+### 📈 综合性能对比图表
+
+![综合精度对比](comprehensive_accuracy_comparison.png)
+*PCE vs 神经网络综合精度对比 - 包含R²评分、MSE误差、精度差异和综合性能雷达图*
+
+![综合速度对比](comprehensive_speed_comparison.png)
+*PCE vs 神经网络综合速度对比 - 包含训练时间、推理时间、速度提升倍数和吞吐量对比*
 
 ### 🚀 速度性能
 | 指标 | PCE | 神经网络 | 提升倍数 |
@@ -73,6 +164,10 @@ make benchmark
 | 内存占用 | 6KB | 500KB+ | **83x** |
 
 ### 🎯 精度对比（基于实际测试）
+
+![精度分析对比](pce_accuracy_analysis.png)
+*详细精度分析图表 - 展示不同函数类型下PCE与神经网络的精度对比*
+
 | 函数类型 | PCE R² | 神经网络 R² | PCE表现 | 推荐使用 |
 |----------|--------|-------------|---------|----------|
 | **多项式函数** | **99.89%** | 99.66% | PCE更精确 | ✅ 强烈推荐PCE |
@@ -160,6 +255,35 @@ do i = 1, 78
 enddo
 ```
 
+## 🚀 部署特性对比
+
+### 💾 模型大小与内存使用
+
+![模型大小对比](model_size_comparison.png)
+*PCE vs 神经网络模型存储空间对比 - PCE模型仅需20KB，而神经网络需要500KB+*
+
+![内存使用对比](memory_usage_comparison.png)
+*运行时内存使用对比 - PCE在模型加载和推理过程中都显著节省内存*
+
+### 🔧 部署复杂度与平台兼容性
+
+![部署复杂度对比](deployment_complexity_comparison.png)
+*部署步骤和特性对比 - PCE部署更简单，依赖更少，维护成本更低*
+
+![平台兼容性对比](platform_compatibility_comparison.png)
+*跨平台兼容性对比 - PCE可以部署到更多平台，包括嵌入式系统*
+
+### 📊 部署优势总结
+
+| 特性 | PCE | 神经网络 | PCE优势 |
+|------|-----|----------|---------|
+| **模型大小** | 20KB | 500KB+ | **25倍更小** |
+| **内存占用** | 9MB | 17MB | **47%节省** |
+| **部署步骤** | 3步 | 5步 | **更简单** |
+| **运行时依赖** | 无 | Python+框架 | **零依赖** |
+| **跨平台性** | 优秀 | 一般 | **更广泛** |
+| **启动时间** | 毫秒级 | 秒级 | **更快速** |
+
 ## 📈 使用场景
 
 ### ✅ 强烈推荐PCE的场景（精度高+速度快）：
@@ -203,6 +327,14 @@ trainer.train(X, Y)
 trainer.save_model('my_pce_model.pkl')
 trainer.export_fortran_coefficients('my_coefficients.txt')
 ```
+
+### 📊 训练结果可视化
+
+![PCE训练结果](pce_training_results.png)
+*PCE模型训练结果 - 显示前3个输出维度的预测精度*
+
+![PCE vs NN对比](pce_vs_nn_comparison.png)
+*PCE与神经网络详细对比结果*
 
 ### Fortran推理示例
 
@@ -320,5 +452,29 @@ MIT License - 详见LICENSE文件
 ### 🚀 核心优势
 
 PCE的最大价值在于为**工程和科学计算**提供了一个**高效、可解释、易部署**的神经网络替代方案。在合适的应用场景下，PCE不仅速度更快，精度甚至可能更高！
+
+### 📊 可视化对比
+
+本项目提供了丰富的可视化对比图表，全面展示PCE相对于神经网络的优势：
+
+#### 🎯 核心对比图表
+- **综合精度对比**: R²评分、MSE误差、精度差异和综合性能雷达图
+- **综合速度对比**: 训练时间、推理时间、速度提升倍数和吞吐量对比
+- **模型大小对比**: 存储空间占用对比（PCE仅需20KB vs NN的500KB+）
+- **内存使用对比**: 运行时内存占用对比（PCE节省47%内存）
+
+#### 🚀 部署特性对比
+- **部署复杂度对比**: 部署步骤、依赖项、维护成本的全面对比
+- **平台兼容性对比**: 跨平台支持能力，包括嵌入式系统兼容性
+- **精度分析图**: 不同函数类型下的详细精度分析
+- **训练结果图**: 模型训练过程和预测精度可视化
+
+#### 📈 图表特色
+- **一键生成**: 使用 `python generate_all_charts.py` 一键生成所有图表
+- **交互查看**: 使用 `python view_charts.py` 交互式查看图表
+- **高质量输出**: 300 DPI高分辨率图表，适合论文和报告使用
+- **数据驱动**: 基于真实测试数据，提供可靠的性能对比
+
+这些图表帮助您直观理解PCE的优势，为技术选型提供强有力的数据支持。
 
 **注意**: 这个实现专门针对2输入78输出的问题进行了优化。如需处理其他维度的问题，请相应修改代码中的维度参数。
